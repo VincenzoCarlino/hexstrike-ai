@@ -129,6 +129,13 @@ pip3 install -r requirements.txt
 
 ```
 
+### Run it in Docker (all tools included)
+
+To get the server with almost every supported tool preinstalled, without installing them on your
+machine, use the Docker image. [docker/README.md](docker/README.md) walks through the setup on
+Docker Desktop, OrbStack, Rancher Desktop and Linux, and connecting Codex, Claude Code and other
+MCP clients.
+
 ### Installation and Setting Up Guide for various AI Clients:
 
 #### Installation & Demo Video

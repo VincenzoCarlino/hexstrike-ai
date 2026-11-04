@@ -840,8 +840,9 @@ VOLUME ["/root/.cache/trivy", \
         "/root/.msf4", \
         "/workspace"]
 
-# Copy server code at the end to leverage Docker layer caching
-COPY hexstrike_server.py /opt/hexstrike/
+# Copy server code at the end to leverage Docker layer caching.
+# hexstrike_mcp.py lets MCP clients run the bridge with `docker exec -i` (no Python on the host).
+COPY hexstrike_server.py hexstrike_mcp.py /opt/hexstrike/
 
 # Expose MCP server port
 EXPOSE 8888

@@ -1,0 +1,56 @@
+# HexStrike AI - full toolset in Docker (see docker/README.md)
+#
+#   docker compose up -d --build     build (first time) and start
+#   docker compose logs -f           follow server logs
+#   docker compose down              stop
+#
+# Paths for the host folders come from the .env file next to this file.
+name: hexstrike
+
+services:
+  hexstrike:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: hexstrike-ai:local
+    container_name: hexstrike
+    restart: unless-stopped
+
+    # API only reachable from THIS machine. The server has an unauthenticated
+    # /api/command endpoint: never change this to "8888:8888".
+    ports:
+      - "127.0.0.1:8888:8888"
+
+    # Lets tools in the container reach services running on the host machine,
+    # including ones listening only on the host's 127.0.0.1:
+    #   http://localhost:3000 on the host  ->  http://host.docker.internal:3000 in the container
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # Raw sockets for nmap SYN scans, masscan, tcpdump, responder.
+    # Deliberately NOT privileged and NOT host networking.
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+
+    volumes:
+      # Host files the tools can READ (source code, binaries, captures...) -> /targets
+      - ${HEXSTRIKE_TARGETS:-./targets}:/targets:ro
+      # Host folder for reports and tool output (read/write) -> /workspace
+      - ${HEXSTRIKE_WORKSPACE:-./workspace}:/workspace
+      # Tool databases, kept across rebuilds
+      - nuclei-templates:/root/nuclei-templates
+      - trivy-cache:/root/.cache/trivy
+      - wpscan-db:/root/.wpscan/db
+      - amass-config:/root/.config/amass
+      - msf:/root/.msf4
+
+    environment:
+      TZ: ${TZ:-Europe/Rome}
+
+volumes:
+  nuclei-templates:
+  trivy-cache:
+  wpscan-db:
+  amass-config:
+  msf:

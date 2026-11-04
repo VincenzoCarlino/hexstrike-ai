@@ -1,0 +1,9 @@
+.git/
+__pycache__/
+*.pyc
+hexstrike-env/
+workspace/
+targets/
+logs/
+data/
+.env

@@ -24,8 +24,10 @@ services:
     # Lets tools in the container reach services running on the host machine,
     # including ones listening only on the host's 127.0.0.1:
     #   http://localhost:3000 on the host  ->  http://host.docker.internal:3000 in the container
+    # host-gateway works on Linux, Docker Desktop and OrbStack. Rancher Desktop needs its
+    # host address instead: set HEXSTRIKE_HOST_IP in .env (see .env.example).
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "host.docker.internal:${HEXSTRIKE_HOST_IP:-host-gateway}"
 
     # Raw sockets for nmap SYN scans, masscan, tcpdump, responder.
     # Deliberately NOT privileged and NOT host networking.

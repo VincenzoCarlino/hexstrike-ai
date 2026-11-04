@@ -25,13 +25,32 @@ python3 hexstrike_mcp.py --server http://127.0.0.1:8888
 | Need | How |
 |---|---|
 | API reachable only from this machine | `ports: 127.0.0.1:8888:8888`. The server exposes `/api/command` without authentication, so do not publish it on all interfaces. |
-| Reach services on the host's `localhost` | `extra_hosts: host.docker.internal:host-gateway`. Inside the container use `http://host.docker.internal:<port>` instead of `http://localhost:<port>`. |
+| Reach services on the host's `localhost` | `extra_hosts: host.docker.internal:host-gateway`. Inside the container use `http://host.docker.internal:<port>` instead of `http://localhost:<port>`. On Rancher Desktop set `HEXSTRIKE_HOST_IP` in `.env` (see below). |
 | Read files from the host | `HEXSTRIKE_TARGETS` is mounted read-only at `/targets`. Give tools paths under `/targets/...`. |
 | Keep reports and output | `HEXSTRIKE_WORKSPACE` is mounted read/write at `/workspace`. |
 | Raw-socket scans (nmap `-sS`, masscan, tcpdump) | `cap_add: NET_RAW, NET_ADMIN`. The container is not privileged and does not use host networking. |
 | Tool databases survive rebuilds | Named volumes for nuclei templates, trivy, wpscan, amass and Metasploit. |
 
 `127.0.0.1` inside the container is the container itself, not the host.
+
+### Rancher Desktop
+
+`host-gateway` resolves to the Docker bridge inside Rancher Desktop's VM, not to the host,
+so `host.docker.internal` is unreachable. Find the host address and put it in `.env`:
+
+```bash
+rdctl shell grep internal /etc/hosts
+# 192.168.127.254 host.rancher-desktop.internal host.docker.internal
+```
+
+```bash
+HEXSTRIKE_HOST_IP=192.168.127.254
+```
+
+Then `docker compose up -d` to recreate the container.
+
+Web servers that only accept `Host: localhost` (IIS Express, for example) answer 400 to
+`host.docker.internal`; pass `-H "Host: localhost:<port>"` to the tool.
 
 ## Image notes
 
